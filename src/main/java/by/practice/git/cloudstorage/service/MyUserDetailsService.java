@@ -4,7 +4,6 @@ import by.practice.git.cloudstorage.model.Role;
 import by.practice.git.cloudstorage.model.User;
 import by.practice.git.cloudstorage.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

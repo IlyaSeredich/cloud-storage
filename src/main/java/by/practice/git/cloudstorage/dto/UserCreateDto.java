@@ -17,6 +17,15 @@ public class UserCreateDto {
     @ValidEmail
     private String email;
 
+    public UserCreateDto(String username, String password, String email) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+    }
+
+    public UserCreateDto() {
+    }
+
     public String getUsername() {
         return username;
     }
