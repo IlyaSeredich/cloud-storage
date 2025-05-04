@@ -38,12 +38,6 @@ public class UserController {
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
     }
 
-    @GetMapping("/auth/sign-in/hello")
-    public ResponseEntity<String> hello() {
-
-        return ResponseEntity.ok("hello");
-    }
-
     @GetMapping("/user/me")
     public ResponseEntity<UserResponseDto> me(@AuthenticationPrincipal User user) {
         UserResponseDto userResponseDto = userService.getUsersInfo(user);
