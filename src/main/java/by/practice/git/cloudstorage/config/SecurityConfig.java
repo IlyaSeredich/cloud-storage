@@ -43,6 +43,7 @@ public class SecurityConfig {
                         request
                                 .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in").permitAll()
                                 .requestMatchers("/api/auth/sign-in/hello").authenticated()
+                                .requestMatchers("/api/directory").authenticated()
                                 .requestMatchers("/api/user/me").authenticated()
                                 .anyRequest().permitAll()
 

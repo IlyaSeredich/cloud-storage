@@ -3,7 +3,7 @@ package by.practice.git.cloudstorage.controller;
 import by.practice.git.cloudstorage.dto.UserAuthDto;
 import by.practice.git.cloudstorage.dto.UserCreateDto;
 import by.practice.git.cloudstorage.dto.UserResponseDto;
-import by.practice.git.cloudstorage.service.UserService;
+import by.practice.git.cloudstorage.service.impl.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,16 +15,16 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 public class UserController {
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(UserServiceImpl userServiceImpl) {
+        this.userServiceImpl = userServiceImpl;
     }
 
     @PostMapping("/auth/sign-up")
     public ResponseEntity<UserResponseDto> register(@Valid @RequestBody UserCreateDto userCreateDto,
                                                     HttpServletRequest request) {
-        UserResponseDto userResponseDto = userService.registerNewUserAccount(userCreateDto, request);
+        UserResponseDto userResponseDto = userServiceImpl.registerNewUserAccount(userCreateDto, request);
 
         return new ResponseEntity<>(userResponseDto, HttpStatus.CREATED);
     }
@@ -33,14 +33,14 @@ public class UserController {
     public ResponseEntity<UserResponseDto> authorize(
             @Valid @RequestBody UserAuthDto userAuthDto,
             HttpServletRequest request) {
-        UserResponseDto userResponseDto = userService.authorizeUser(userAuthDto, request);
+        UserResponseDto userResponseDto = userServiceImpl.authorizeUser(userAuthDto, request);
 
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
     }
 
     @GetMapping("/user/me")
     public ResponseEntity<UserResponseDto> me(@AuthenticationPrincipal User user) {
-        UserResponseDto userResponseDto = userService.getUsersInfo(user);
+        UserResponseDto userResponseDto = userServiceImpl.getUsersInfo(user);
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
     }
 }

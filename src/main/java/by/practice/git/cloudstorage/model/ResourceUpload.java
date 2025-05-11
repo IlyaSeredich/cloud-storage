@@ -2,14 +2,14 @@ package by.practice.git.cloudstorage.model;
 
 import org.springframework.web.multipart.MultipartFile;
 
-public class FileUpload {
+public class ResourceUpload {
     private MultipartFile multipartFile;
 
-    public FileUpload(MultipartFile multipartFile) {
+    public ResourceUpload(MultipartFile multipartFile) {
         this.multipartFile = multipartFile;
     }
 
-    public FileUpload() {
+    public ResourceUpload() {
     }
 
     public MultipartFile getMultipartFile() {
