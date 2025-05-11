@@ -9,6 +9,6 @@ import org.springframework.security.core.userdetails.User;
 public interface IUserService {
     UserResponseDto registerNewUserAccount(UserCreateDto userCreateDto, HttpServletRequest request);
     UserResponseDto authorizeUser(UserAuthDto userAuthDto, HttpServletRequest request);
-
     UserResponseDto getUsersInfo(User user);
+    Long getUsersId(User user);
 }

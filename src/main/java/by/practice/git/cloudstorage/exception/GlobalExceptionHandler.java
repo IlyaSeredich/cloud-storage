@@ -2,11 +2,13 @@ package by.practice.git.cloudstorage.exception;
 
 import by.practice.git.cloudstorage.dto.ErrorResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -63,6 +65,34 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponseDto> handleConstraintViolationException(
+            ConstraintViolationException ex,
+            HttpServletRequest request
+    ) {
+
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponseDto> handleMissingServletRequestParameterException(
+            MissingServletRequestParameterException ex,
+            HttpServletRequest request
+    ) {
+
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
+    }
+
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleUsernameNotFoundException(
             UsernameNotFoundException ex,
@@ -79,7 +109,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponseDto> handleBadCredentialsException(
-            BadCredentialsException ex,
             HttpServletRequest request
     ) {
         ErrorResponseDto responseDto = new ErrorResponseDto(
@@ -91,17 +120,87 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(responseDto, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleException(
-            Exception ex,
+    @ExceptionHandler(MinioBucketInitializationException.class)
+    public ResponseEntity<ErrorResponseDto> handleMinioBucketInitializationException(
+            MinioBucketInitializationException ex,
             HttpServletRequest request
     ) {
         ErrorResponseDto responseDto = new ErrorResponseDto(
-                "An unexpected error occurred",
+                ex.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 request.getRequestURI()
         );
 
         return new ResponseEntity<>(responseDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(CreateRootMinioDirectoryException.class)
+    public ResponseEntity<ErrorResponseDto> handleCreateRootMinioDirectoryException(
+            CreateRootMinioDirectoryException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MinioCreatingDirectoryException.class)
+    public ResponseEntity<ErrorResponseDto> handleMinioCreatingDirectoryException(
+            MinioCreatingDirectoryException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MinioExistingParentDirectoryException.class)
+    public ResponseEntity<ErrorResponseDto> handleMinioExistingParentDirectoryException(
+            MinioExistingParentDirectoryException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MinioDirectoryAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDto> handleMinioDirectoryAlreadyExistsException(
+            MinioDirectoryAlreadyExistsException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.CONFLICT,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.CONFLICT);
+    }
+
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ErrorResponseDto> handleException(
+//            Exception ex,
+//            HttpServletRequest request
+//    ) {
+//        ErrorResponseDto responseDto = new ErrorResponseDto(
+//                "An unexpected error occurred",
+//                HttpStatus.INTERNAL_SERVER_ERROR,
+//                request.getRequestURI()
+//        );
+//
+//        return new ResponseEntity<>(responseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 }
