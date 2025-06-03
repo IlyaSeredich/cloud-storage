@@ -2,7 +2,7 @@ package by.practice.git.cloudstorage.config;
 
 import by.practice.git.cloudstorage.dto.ErrorResponseDto;
 import by.practice.git.cloudstorage.exception.UnauthorizedException;
-import by.practice.git.cloudstorage.service.MyUserDetailsService;
+import by.practice.git.cloudstorage.service.impl.MyUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +17,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -25,12 +26,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final MyUserDetailsService myUserDetailsService;
-    private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
 
-    public SecurityConfig(MyUserDetailsService myUserDetailsService, PasswordEncoder passwordEncoder, ObjectMapper objectMapper) {
+    public SecurityConfig(MyUserDetailsService myUserDetailsService, ObjectMapper objectMapper) {
         this.myUserDetailsService = myUserDetailsService;
-        this.passwordEncoder = passwordEncoder;
         this.objectMapper = objectMapper;
     }
 
@@ -42,8 +41,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request
                                 .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in").permitAll()
-                                .requestMatchers("/api/auth/sign-in/hello").authenticated()
                                 .requestMatchers("/api/directory").authenticated()
+                                .requestMatchers("/api/resource").authenticated()
                                 .requestMatchers("/api/user/me").authenticated()
                                 .anyRequest().permitAll()
 
@@ -72,7 +71,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(
                                 (request, response, authException) -> {
                                     ErrorResponseDto errorResponse = new ErrorResponseDto(
-                                            UnauthorizedException.createMessage(),
+                                            UnauthorizedException.getErrorMessage(),
                                             HttpStatus.UNAUTHORIZED,
                                             request.getRequestURI()
                                     );
@@ -87,9 +86,14 @@ public class SecurityConfig {
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         daoAuthenticationProvider.setUserDetailsService(myUserDetailsService);
 
         return daoAuthenticationProvider;

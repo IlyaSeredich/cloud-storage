@@ -1,14 +1,14 @@
 package by.practice.git.cloudstorage.exception;
 
 public class MinioBucketInitializationException extends RuntimeException {
-    private static final String MESSAGE_TEMPLATE = "Failed initialization minio bucket";
+    private static final String MESSAGE = "Failed initialization minio bucket";
 
     public MinioBucketInitializationException(
     ) {
-        super(createMessage());
+        super(getErrorMessage());
     }
 
-    public static String createMessage() {
-        return MESSAGE_TEMPLATE;
+    public static String getErrorMessage() {
+        return MESSAGE;
     }
 }

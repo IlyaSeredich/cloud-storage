@@ -1,6 +1,7 @@
-package by.practice.git.cloudstorage.exception;
+package by.practice.git.cloudstorage.exception.handler;
 
 import by.practice.git.cloudstorage.dto.ErrorResponseDto;
+import by.practice.git.cloudstorage.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -188,6 +189,76 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(responseDto, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(MinioUploadingResourceAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDto> handleMinioUploadingResourceAlreadyExistsException(
+            MinioUploadingResourceAlreadyExistsException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.CONFLICT,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidUploadingFilenameException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidUploadingFilenameException(
+            InvalidUploadingFilenameException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MinioDirectoryNotExistsException.class)
+    public ResponseEntity<ErrorResponseDto> handleMinioDirectoryNotExistsException(
+            MinioDirectoryNotExistsException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MinioUploadException.class)
+    public ResponseEntity<ErrorResponseDto> handleMinioUploadException(
+            MinioUploadException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MinioGettingDirectoryContentException.class)
+    public ResponseEntity<ErrorResponseDto> MinioGettingDirectoryContentException(
+            MinioGettingDirectoryContentException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 //    @ExceptionHandler(Exception.class)

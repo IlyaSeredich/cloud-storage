@@ -4,7 +4,6 @@ import by.practice.git.cloudstorage.dto.UserAuthDto;
 import by.practice.git.cloudstorage.dto.UserCreateDto;
 import by.practice.git.cloudstorage.exception.EmailAlreadyExistException;
 import by.practice.git.cloudstorage.exception.UserAlreadyExistException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -245,7 +244,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateDto)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(UserAlreadyExistException.createMessage(USERNAME)))
+                .andExpect(jsonPath("$.message").value(UserAlreadyExistException.createErrorMessage(USERNAME)))
                 .andExpect(jsonPath("$.error").value(HttpStatus.CONFLICT.getReasonPhrase()))
                 .andExpect(jsonPath("$.status").value(HttpStatus.CONFLICT.value()))
                 .andExpect(jsonPath("$.path").value(url))
@@ -269,7 +268,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(secondUserCreateDto)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(EmailAlreadyExistException.createMessage(EMAIL)))
+                .andExpect(jsonPath("$.message").value(EmailAlreadyExistException.createErrorMessage(EMAIL)))
                 .andExpect(jsonPath("$.error").value(HttpStatus.CONFLICT.getReasonPhrase()))
                 .andExpect(jsonPath("$.status").value(HttpStatus.CONFLICT.value()))
                 .andExpect(jsonPath("$.path").value(url))

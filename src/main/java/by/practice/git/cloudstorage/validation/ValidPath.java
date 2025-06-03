@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidPath {
-    String message() default "Невалидный путь";
+    String message() default "Invalid path";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

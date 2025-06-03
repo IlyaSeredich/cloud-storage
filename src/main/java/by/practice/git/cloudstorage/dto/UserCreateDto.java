@@ -4,7 +4,6 @@ import by.practice.git.cloudstorage.validation.ValidEmail;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-
 public class UserCreateDto {
     @NotBlank
     @Size(min = 4, max = 15)

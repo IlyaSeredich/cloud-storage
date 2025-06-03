@@ -1,8 +1,9 @@
 package by.practice.git.cloudstorage.controller;
 
-import by.practice.git.cloudstorage.dto.CreateDirectoryResponseDto;
-import by.practice.git.cloudstorage.dto.FileUploadDto;
-import by.practice.git.cloudstorage.service.IResourceService;
+import by.practice.git.cloudstorage.dto.*;
+import by.practice.git.cloudstorage.dto.DirectoryResponseDto;
+import by.practice.git.cloudstorage.dto.BaseResourceResponseDto;
+import by.practice.git.cloudstorage.service.ResourceService;
 import by.practice.git.cloudstorage.validation.ValidPath;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -13,33 +14,60 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 @Validated
 public class ResourceController {
-    private final IResourceService fileService;
+    private final ResourceService resourceService;
 
-    public ResourceController(IResourceService fileService) {
-        this.fileService = fileService;
+    public ResourceController(ResourceService resourceService) {
+        this.resourceService = resourceService;
     }
 
-    public void upload(
-            @RequestBody FileUploadDto fileUploadDto
-    ) {
-        fileService.upload(fileUploadDto);
-    }
-
-    @PostMapping("/directory")
-    public ResponseEntity<CreateDirectoryResponseDto> createDirectory(
+    @PostMapping("/resource")
+    public ResponseEntity<List<FileResponseDtoDto>> upload(
             @RequestParam
             @Size(max = 255, message = "Max path params size = 255")
             @NotBlank(message = "Param path should not be empty")
             @ValidPath(message = "Incorrect characters in path: <>,:,\",|,?,*,..")
             String path,
-            @AuthenticationPrincipal User user
+            @ModelAttribute
+            FileUploadDto fileUploadDto,
+            @AuthenticationPrincipal
+            User user
     ) {
-        CreateDirectoryResponseDto createDirectoryResponseDto = fileService.createEmptyDir(user, path);
+        List<FileResponseDtoDto> responseDto = resourceService.uploadFiles(path, fileUploadDto, user);
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/directory")
+    public ResponseEntity<DirectoryResponseDto> createDirectory(
+            @RequestParam
+            @Size(max = 255, message = "Max path params size = 255")
+            @NotBlank(message = "Param path should not be empty")
+            @ValidPath(message = "Incorrect characters in path: <>,:,\",|,?,*, ,..")
+            String path,
+            @AuthenticationPrincipal
+            User user
+    ) {
+        DirectoryResponseDto createDirectoryResponseDto = resourceService.createEmptyDirectory(path, user);
         return new ResponseEntity<>(createDirectoryResponseDto, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/directory")
+    public ResponseEntity<List<BaseResourceResponseDto>> getDirectoryContent(
+            @RequestParam
+            @Size(max = 255, message = "Max path params size = 255")
+            @NotBlank(message = "Param path should not be empty")
+            @ValidPath(message = "Incorrect characters in path: <>,:,\",|,?,*,..")
+            String path,
+            @AuthenticationPrincipal
+            User user
+    ) {
+        List<BaseResourceResponseDto> createDirectoryResponseDto = resourceService.getDirectoryContent(path, user);
+        return new ResponseEntity<>(createDirectoryResponseDto, HttpStatus.OK);
     }
 
 

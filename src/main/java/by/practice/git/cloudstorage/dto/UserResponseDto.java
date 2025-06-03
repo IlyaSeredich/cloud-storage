@@ -7,9 +7,6 @@ public class UserResponseDto {
         this.username = username;
     }
 
-    public UserResponseDto() {
-    }
-
     public String getUsername() {
         return username;
     }

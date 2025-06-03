@@ -10,29 +10,33 @@ import org.springframework.stereotype.Component;
 @Component
 public class MinioInitializer {
     private final MinioClient minioClient;
-    private final MinioProperties minioProperties;
+    private final String minioBucketName ;
 
     public MinioInitializer(MinioClient minioClient, MinioProperties minioProperties) {
         this.minioClient = minioClient;
-        this.minioProperties = minioProperties;
+        this.minioBucketName = minioProperties.getBucket();
     }
 
     @PostConstruct
-    public void init() {
-        String bucketName = minioProperties.getBucket();
-
+    public void createRootBucketIfNotExists() {
         try {
-            boolean found = minioClient.bucketExists(BucketExistsArgs.builder()
-                    .bucket(bucketName)
-                    .build());
-
-            if (!found) {
-                minioClient.makeBucket(MakeBucketArgs.builder()
-                        .bucket(bucketName)
-                        .build());
+            if (!isBucketExists()) {
+                createNewBucket();
             }
         } catch (Exception ex) {
             throw new MinioBucketInitializationException();
         }
+    }
+
+    private boolean isBucketExists() throws Exception {
+        return minioClient.bucketExists(BucketExistsArgs.builder()
+                .bucket(minioBucketName)
+                .build());
+    }
+
+    private void createNewBucket() throws Exception{
+        minioClient.makeBucket(MakeBucketArgs.builder()
+                .bucket(minioBucketName)
+                .build());
     }
 }

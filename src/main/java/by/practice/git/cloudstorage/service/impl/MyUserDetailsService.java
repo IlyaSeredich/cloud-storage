@@ -1,4 +1,4 @@
-package by.practice.git.cloudstorage.service;
+package by.practice.git.cloudstorage.service.impl;
 
 import by.practice.git.cloudstorage.model.Role;
 import by.practice.git.cloudstorage.model.User;
