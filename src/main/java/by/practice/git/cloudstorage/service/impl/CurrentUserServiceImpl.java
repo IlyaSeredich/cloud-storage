@@ -1,7 +1,7 @@
 package by.practice.git.cloudstorage.service.impl;
 
 import by.practice.git.cloudstorage.dto.UserResponseDto;
-import by.practice.git.cloudstorage.mapper.UserMapperDepr;
+import by.practice.git.cloudstorage.mapper.UserMapper;
 import by.practice.git.cloudstorage.model.User;
 import by.practice.git.cloudstorage.repository.UserRepository;
 import by.practice.git.cloudstorage.service.CurrentUserService;
@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class CurrentUserServiceImpl implements CurrentUserService {
     private final UserRepository userRepository;
-    private final UserMapperDepr userMapper;
+    private final UserMapper userMapper;
 
-    public CurrentUserServiceImpl(UserRepository userRepository, UserMapperDepr userMapper) {
+    public CurrentUserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
     }

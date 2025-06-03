@@ -205,20 +205,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(responseDto, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(InvalidUploadingFilenameException.class)
-    public ResponseEntity<ErrorResponseDto> handleInvalidUploadingFilenameException(
-            InvalidUploadingFilenameException ex,
-            HttpServletRequest request
-    ) {
-        ErrorResponseDto responseDto = new ErrorResponseDto(
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST,
-                request.getRequestURI()
-        );
-
-        return new ResponseEntity<>(responseDto, HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(MinioDirectoryNotExistsException.class)
     public ResponseEntity<ErrorResponseDto> handleMinioDirectoryNotExistsException(
             MinioDirectoryNotExistsException ex,

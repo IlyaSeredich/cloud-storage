@@ -1,13 +1,14 @@
 package by.practice.git.cloudstorage.service.impl;
 
-import by.practice.git.cloudstorage.dto.*;
-import by.practice.git.cloudstorage.dto.DirectoryResponseDto;
 import by.practice.git.cloudstorage.dto.BaseResourceResponseDto;
-import by.practice.git.cloudstorage.dto.enums.ResourceType;
+import by.practice.git.cloudstorage.dto.DirectoryResponseDto;
+import by.practice.git.cloudstorage.dto.FileResponseDto;
+import by.practice.git.cloudstorage.dto.FileUploadDto;
 import by.practice.git.cloudstorage.exception.MinioDirectoryAlreadyExistsException;
 import by.practice.git.cloudstorage.exception.MinioDirectoryNotExistsException;
 import by.practice.git.cloudstorage.exception.MinioExistingParentDirectoryException;
 import by.practice.git.cloudstorage.exception.MinioUploadingResourceAlreadyExistsException;
+import by.practice.git.cloudstorage.mapper.ResourceMapper;
 import by.practice.git.cloudstorage.service.*;
 import io.minio.messages.Item;
 import org.springframework.security.core.userdetails.User;
@@ -23,12 +24,14 @@ public class MinioResourceServiceImpl implements ResourceService {
     private final PathBuilderService pathBuilderService;
     private final PathFormatterService pathFormatterService;
     private final MinioStorageService minioStorageService;
+    private final ResourceMapper resourceMapper;
 
-    public MinioResourceServiceImpl(CurrentUserService currentUserService, PathBuilderService pathBuilderService, PathFormatterService pathFormatterService, MinioStorageService minioStorageService) {
+    public MinioResourceServiceImpl(CurrentUserService currentUserService, PathBuilderService pathBuilderService, PathFormatterService pathFormatterService, MinioStorageService minioStorageService, ResourceMapper resourceMapper) {
         this.currentUserService = currentUserService;
         this.pathBuilderService = pathBuilderService;
         this.pathFormatterService = pathFormatterService;
         this.minioStorageService = minioStorageService;
+        this.resourceMapper = resourceMapper;
     }
 
     @Override
@@ -42,11 +45,11 @@ public class MinioResourceServiceImpl implements ResourceService {
         String fullPath = getDirectoryFullPath(user, directoryPathFromRequest);
         validateCreatingDirectoryConditions(fullPath);
         putEmptyDirectoryInMinio(fullPath);
-        return createDirectoryResponseDto(fullPath);
+        return getDirectoryResponseDto(fullPath);
     }
 
     @Override
-    public List<FileResponseDtoDto> uploadFiles(String parentPathFromRequest, FileUploadDto fileUploadDto, User user) {
+    public List<FileResponseDto> uploadFiles(String parentPathFromRequest, FileUploadDto fileUploadDto, User user) {
         List<MultipartFile> multipartFileList = fileUploadDto.getMultipartFile();
         String parentPath = getDirectoryFullPath(user, parentPathFromRequest);
         validateFileParentDirectoryExists(parentPath);
@@ -65,9 +68,9 @@ public class MinioResourceServiceImpl implements ResourceService {
         directoryObjectsList.forEach(item -> {
             String itemName = item.objectName();
             if(item.isDir()) {
-                dtoList.add(createDirectoryResponseDto(directoryPathFromRequest, getDirectoryNameForResponse(itemName)));
+                dtoList.add(getDirectoryResponseDto(directoryPathFromRequest, getDirectoryNameForResponse(itemName)));
             } else {
-                dtoList.add(createFileResponseDto(directoryPathFromRequest, getFilenameForResponse(itemName), item.size()));
+                dtoList.add(getFileResponseDto(directoryPathFromRequest, getFilenameForResponse(itemName), item.size()));
             }
         });
         return dtoList;
@@ -106,20 +109,15 @@ public class MinioResourceServiceImpl implements ResourceService {
         minioStorageService.putEmptyDirectory(fullPath);
     }
 
-    private DirectoryResponseDto createDirectoryResponseDto(String fullPath) {
-        return new DirectoryResponseDto(
-                getFormatedParentPathForResponse(fullPath),
-                getDirectoryNameForResponse(fullPath),
-                ResourceType.DIRECTORY
-        );
+    private DirectoryResponseDto getDirectoryResponseDto(String fullPath) {
+        String parentPathForResponse = getFormatedParentPathForResponse(fullPath);
+        String directoryNameForResponse = getDirectoryNameForResponse(fullPath);
+        return resourceMapper.createDirectoryResponseDto(parentPathForResponse, directoryNameForResponse);
     }
 
-    private DirectoryResponseDto createDirectoryResponseDto(String pathFromRequest, String dirName) {
-        return new DirectoryResponseDto(
-                getNormalizedPath(pathFromRequest),
-                dirName,
-                ResourceType.DIRECTORY
-        );
+    private DirectoryResponseDto getDirectoryResponseDto(String pathFromRequest, String dirName) {
+        String normalizedPath = getNormalizedPath(pathFromRequest);
+        return resourceMapper.createDirectoryResponseDto(normalizedPath, dirName);
     }
 
     private void validateFileParentDirectoryExists(String parentPath) {
@@ -129,8 +127,8 @@ public class MinioResourceServiceImpl implements ResourceService {
         }
     }
 
-    private List<FileResponseDtoDto> uploadValidatedFiles(String parentPathFromRequest, List<MultipartFile> multipartFileList, User user) {
-        List<FileResponseDtoDto> fileResponseDtoList = new ArrayList<>();
+    private List<FileResponseDto> uploadValidatedFiles(String parentPathFromRequest, List<MultipartFile> multipartFileList, User user) {
+        List<FileResponseDto> fileResponseDtoList = new ArrayList<>();
         Long userId = getCurrentUserId(user);
 
         multipartFileList.forEach(multipartFile -> {
@@ -139,7 +137,7 @@ public class MinioResourceServiceImpl implements ResourceService {
             validateFileNotExists(fullFilePath);
             putFileInMinio(fullFilePath, multipartFile);
             fileResponseDtoList.add(
-                    createFileResponseDto(fullFilePath, multipartFile.getSize())
+                    getFileResponseDto(fullFilePath, multipartFile.getSize())
             );
         });
 
@@ -185,22 +183,15 @@ public class MinioResourceServiceImpl implements ResourceService {
         minioStorageService.putFile(fullFilePath, multipartFile);
     }
 
-    private FileResponseDtoDto createFileResponseDto(String fullPath, Long size) {
-        return new FileResponseDtoDto(
-                getFormatedParentPathForResponse(fullPath),
-                getFilenameForResponse(fullPath),
-                size,
-                ResourceType.FILE
-        );
+    private FileResponseDto getFileResponseDto(String fullPath, Long size) {
+        String formatedParentPathForResponse = getFormatedParentPathForResponse(fullPath);
+        String filenameForResponse = getFilenameForResponse(fullPath);
+        return resourceMapper.createFileResponseDto(formatedParentPathForResponse, filenameForResponse, size);
     }
 
-    private FileResponseDtoDto createFileResponseDto(String pathFromRequest, String filename, Long size) {
-        return new FileResponseDtoDto(
-                getNormalizedPath(pathFromRequest),
-                filename,
-                size,
-                ResourceType.FILE
-        );
+    private FileResponseDto getFileResponseDto(String pathFromRequest, String filename, Long size) {
+        String normalizedPath = getNormalizedPath(pathFromRequest);
+        return resourceMapper.createFileResponseDto(normalizedPath, filename, size);
     }
 
     private String getFilenameForResponse(String fullPath) {
@@ -215,16 +206,15 @@ public class MinioResourceServiceImpl implements ResourceService {
         return pathBuilderService.normalizePathFromRequest(pathFromRequest);
     }
 
-    private String getFormatedParentPathForResponse(String fullPath) {
-        return pathFormatterService.formatParentPathForResponse(fullPath);
-    }
-
     private String extractParentDirectoryPath(String fullPath) {
         return pathFormatterService.extractParentPath(fullPath);
+    }
+
+    private String getFormatedParentPathForResponse(String fullPath) {
+        return pathFormatterService.formatParentPathForResponse(fullPath);
     }
 
     private boolean isResourceExisting(String path) {
         return minioStorageService.isResourceExisting(path);
     }
-
 }

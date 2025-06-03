@@ -51,12 +51,6 @@ public class PathAdapterServiceImpl implements PathBuilderService, PathFormatter
     }
 
     @Override
-    public String extractParentPath(String fullPath) {
-        int parentPathLastIndex = fullPath.lastIndexOf("/", fullPath.length() - 2);
-        return fullPath.substring(0, parentPathLastIndex + 1);
-    }
-
-    @Override
     public String formatDirectoryNameForResponse(String fullPath) {
         String parentPath = extractParentPath(fullPath);
         return fullPath.substring(parentPath.length(), fullPath.length() - 1);
@@ -66,5 +60,11 @@ public class PathAdapterServiceImpl implements PathBuilderService, PathFormatter
     public String formatFilenameForResponse(String fullPath) {
         String parentPath = extractParentPath(fullPath);
         return fullPath.substring(parentPath.length());
+    }
+
+    @Override
+    public String extractParentPath(String fullPath) {
+        int parentPathLastIndex = fullPath.lastIndexOf("/", fullPath.length() - 2);
+        return fullPath.substring(0, parentPathLastIndex + 1);
     }
 }

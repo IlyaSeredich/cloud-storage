@@ -27,7 +27,7 @@ public class ResourceController {
     }
 
     @PostMapping("/resource")
-    public ResponseEntity<List<FileResponseDtoDto>> upload(
+    public ResponseEntity<List<FileResponseDto>> upload(
             @RequestParam
             @Size(max = 255, message = "Max path params size = 255")
             @NotBlank(message = "Param path should not be empty")
@@ -38,7 +38,7 @@ public class ResourceController {
             @AuthenticationPrincipal
             User user
     ) {
-        List<FileResponseDtoDto> responseDto = resourceService.uploadFiles(path, fileUploadDto, user);
+        List<FileResponseDto> responseDto = resourceService.uploadFiles(path, fileUploadDto, user);
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 

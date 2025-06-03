@@ -2,10 +2,10 @@ package by.practice.git.cloudstorage.dto;
 
 import by.practice.git.cloudstorage.dto.enums.ResourceType;
 
-public class FileResponseDtoDto extends BaseResourceResponseDto {
+public class FileResponseDto extends BaseResourceResponseDto {
     private Long size;
 
-    public FileResponseDtoDto(String path, String name, Long size, ResourceType type) {
+    public FileResponseDto(String path, String name, Long size, ResourceType type) {
         super(path, name, type);
         this.size = size;
     }
