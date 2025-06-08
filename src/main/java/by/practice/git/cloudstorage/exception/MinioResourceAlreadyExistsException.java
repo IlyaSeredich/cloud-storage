@@ -1,9 +1,9 @@
 package by.practice.git.cloudstorage.exception;
 
-public class MinioDirectoryAlreadyExistsException extends RuntimeException {
-    private static final String MESSAGE_TEMPLATE = "Directory %s already exists";
+public class MinioResourceAlreadyExistsException extends RuntimeException {
+    private static final String MESSAGE_TEMPLATE = "Resource %s already exists";
 
-    public MinioDirectoryAlreadyExistsException(String fullPath) {
+    public MinioResourceAlreadyExistsException(String fullPath) {
         super(createErrorMessage(fullPath));
     }
 

@@ -1,5 +1,6 @@
 package by.practice.git.cloudstorage.service;
 
+import by.practice.git.cloudstorage.dto.BaseResourceResponseDto;
 import by.practice.git.cloudstorage.exception.CreateRootMinioDirectoryException;
 import by.practice.git.cloudstorage.exception.MinioCreatingDirectoryException;
 import by.practice.git.cloudstorage.exception.MinioUploadException;
@@ -18,4 +19,7 @@ public interface MinioStorageService {
     void putFile(String fullFilePath, MultipartFile multipartFile);
     boolean isResourceExisting(String path);
     List<Item> getDirectoryObjectsList(String directoryPath);
+    List<Item> getWholeContentList(String rootDir);
+    void moveResource(String fullPathFrom, String fullPathTo);
+    long getObjectSize(String fullPath);
 }

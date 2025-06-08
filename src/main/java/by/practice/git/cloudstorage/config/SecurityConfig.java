@@ -44,6 +44,8 @@ public class SecurityConfig {
                                 .requestMatchers("/api/directory").authenticated()
                                 .requestMatchers("/api/resource").authenticated()
                                 .requestMatchers("/api/user/me").authenticated()
+                                .requestMatchers("/api/resource/search").authenticated()
+                                .requestMatchers("/api/resource/move").authenticated()
                                 .anyRequest().permitAll()
 
                 )

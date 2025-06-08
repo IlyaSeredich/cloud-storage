@@ -1,18 +1,19 @@
 package by.practice.git.cloudstorage.service.impl;
 
 import by.practice.git.cloudstorage.config.MinioProperties;
-import by.practice.git.cloudstorage.exception.CreateRootMinioDirectoryException;
-import by.practice.git.cloudstorage.exception.MinioCreatingDirectoryException;
-import by.practice.git.cloudstorage.exception.MinioGettingDirectoryContentException;
-import by.practice.git.cloudstorage.exception.MinioUploadException;
+import by.practice.git.cloudstorage.exception.*;
 import by.practice.git.cloudstorage.service.MinioStorageService;
 import io.minio.*;
+import io.minio.errors.*;
 import io.minio.messages.Item;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,7 +91,103 @@ public class MinioStorageServiceImpl implements MinioStorageService {
     @Override
     public List<Item> getDirectoryObjectsList(String directoryPath) {
         Iterable<Result<Item>> directoryObjects = getDirectoryObjects(directoryPath);
-        return convertDirectoryObjectsToList(directoryObjects, directoryPath);
+        return convertMinioObjectsToList(directoryObjects, directoryPath);
+    }
+
+    @Override
+    public List<Item> getWholeContentList(String rootDir) {
+        Iterable<Result<Item>> wholeContent = getWholeContent(rootDir);
+        return convertMinioObjectsToList(wholeContent, rootDir);
+    }
+
+    @Override
+    public void moveResource(String fullPathFrom, String fullPathTo) {
+        if(fullPathFrom.endsWith("/")) {
+
+        }
+        copyObject(fullPathFrom, fullPathTo);
+        removeObject(fullPathFrom);
+    }
+
+    @Override
+    public long getObjectSize(String fullPath) {
+        StatObjectResponse statObjectResponse;
+        try {
+            statObjectResponse = minioClient.statObject(
+                    StatObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(fullPath)
+                            .build()
+            );
+        } catch (Exception ex) {
+            throw new MinioGetObjectSizeException();
+        }
+
+        return statObjectResponse.size();
+    }
+
+    private void copyDirectory(String fullPathFrom, String fullPathTo) {
+        putEmptyDirectory(fullPathTo);
+
+        Iterable<Result<Item>> results = minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(bucketName)
+                        .prefix(fullPathFrom)
+                        .recursive(true)
+                        .build());
+
+        for (Result<Item> itemResult : results) {
+            try {
+                String objectName = itemResult.get().objectName();
+                String relativePath = objectName.substring(fullPathFrom.length());
+                if(relativePath.isBlank()) {
+                    continue;
+                }
+                String targetObjectName = fullPathTo + relativePath;
+            } catch (Exception ex) {
+                throw new MinioMovingException();
+            }
+        }
+    }
+
+    private void copyObject(String fullPathFrom, String fullPathTo) {
+        try {
+            minioClient.copyObject(
+                    CopyObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(fullPathTo)
+                            .source(CopySource.builder()
+                                    .bucket(bucketName)
+                                    .object(fullPathFrom)
+                                    .build())
+                            .build()
+            );
+        } catch (Exception ex) {
+            throw new MinioMovingException();
+        }
+    }
+
+    private void removeObject(String fullPathFrom) {
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(fullPathFrom)
+                            .build()
+            );
+        } catch (Exception ex) {
+            throw new MinioMovingException();
+        }
+    }
+
+    private Iterable<Result<Item>> getWholeContent(String rootDir) {
+        return minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(bucketName)
+                        .prefix(rootDir)
+                        .recursive(true)
+                        .build()
+        );
     }
 
     private Iterable<Result<Item>> getDirectoryObjects(String directoryPath) {
@@ -103,11 +200,11 @@ public class MinioStorageServiceImpl implements MinioStorageService {
         );
     }
 
-    private List<Item> convertDirectoryObjectsToList(Iterable<Result<Item>> directoryObjects, String directoryPath) {
+    private List<Item> convertMinioObjectsToList(Iterable<Result<Item>> objects, String directoryPath) {
         List<Item> itemList = new ArrayList<>();
 
-        directoryObjects.forEach(itemResult -> {
-                    Item item = null;
+        objects.forEach(itemResult -> {
+                    Item item;
                     try {
                         item = itemResult.get();
                     } catch (Exception ex) {

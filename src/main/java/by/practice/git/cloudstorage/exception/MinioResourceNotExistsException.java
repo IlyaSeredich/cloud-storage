@@ -1,9 +1,9 @@
 package by.practice.git.cloudstorage.exception;
 
-public class MinioDirectoryNotExistsException extends RuntimeException {
-    private static final String MESSAGE_TEMPLATE = "Directory %s not exists";
+public class MinioResourceNotExistsException extends RuntimeException {
+    private static final String MESSAGE_TEMPLATE = "Resource %s not exists";
 
-    public MinioDirectoryNotExistsException(String fullPath) {
+    public MinioResourceNotExistsException(String fullPath) {
         super(createErrorMessage(fullPath));
     }
 

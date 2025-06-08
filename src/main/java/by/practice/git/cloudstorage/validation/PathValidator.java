@@ -9,7 +9,7 @@ public class PathValidator implements ConstraintValidator<ValidPath, String> {
     public boolean isValid(String path, ConstraintValidatorContext context) {
         if(path == null) return true;
 
-        String invalidChars = "<>:\"|?* ";
+        String invalidChars = "\" ";
 
         for (char c : invalidChars.toCharArray()) {
             if(path.indexOf(c) != -1) {
@@ -17,7 +17,7 @@ public class PathValidator implements ConstraintValidator<ValidPath, String> {
             }
         }
 
-        return !path.contains("..");
+        return true;
     }
 
 }

@@ -28,13 +28,7 @@ public class PathAdapterServiceImpl implements PathBuilderService, PathFormatter
 
     @Override
     public String normalizePathFromRequest(String pathFromRequest) {
-        String normalizedPath = pathFromRequest.startsWith("/") ? pathFromRequest.substring(1) : pathFromRequest;
-
-        if (!normalizedPath.endsWith("/")) {
-            normalizedPath += "/";
-        }
-
-        return normalizedPath;
+        return pathFromRequest.startsWith("/") ? pathFromRequest.substring(1) : pathFromRequest;
     }
 
     @Override
@@ -64,7 +58,17 @@ public class PathAdapterServiceImpl implements PathBuilderService, PathFormatter
 
     @Override
     public String extractParentPath(String fullPath) {
-        int parentPathLastIndex = fullPath.lastIndexOf("/", fullPath.length() - 2);
-        return fullPath.substring(0, parentPathLastIndex + 1);
+        int penultimateSlashIndex = getPenultimateSlashIndex(fullPath);
+        return fullPath.substring(0, penultimateSlashIndex + 1);
+    }
+
+    @Override
+    public String extractResourceName(String fullPath) {
+        int penultimateSlashIndex = getPenultimateSlashIndex(fullPath);
+        return fullPath.substring(penultimateSlashIndex +1);
+    }
+
+    private int getPenultimateSlashIndex(String fullPath) {
+        return fullPath.lastIndexOf("/", fullPath.length() - 2);
     }
 }

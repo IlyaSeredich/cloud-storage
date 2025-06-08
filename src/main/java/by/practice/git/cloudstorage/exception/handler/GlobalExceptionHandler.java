@@ -177,9 +177,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(responseDto, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(MinioDirectoryAlreadyExistsException.class)
+    @ExceptionHandler(MinioResourceAlreadyExistsException.class)
     public ResponseEntity<ErrorResponseDto> handleMinioDirectoryAlreadyExistsException(
-            MinioDirectoryAlreadyExistsException ex,
+            MinioResourceAlreadyExistsException ex,
             HttpServletRequest request
     ) {
         ErrorResponseDto responseDto = new ErrorResponseDto(
@@ -205,9 +205,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(responseDto, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(MinioDirectoryNotExistsException.class)
+    @ExceptionHandler(MinioResourceNotExistsException.class)
     public ResponseEntity<ErrorResponseDto> handleMinioDirectoryNotExistsException(
-            MinioDirectoryNotExistsException ex,
+            MinioResourceNotExistsException ex,
             HttpServletRequest request
     ) {
         ErrorResponseDto responseDto = new ErrorResponseDto(
@@ -233,8 +233,22 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(responseDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(MinioMovingException.class)
+    public ResponseEntity<ErrorResponseDto> handleMinioMovingException(
+            MinioMovingException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(MinioGettingDirectoryContentException.class)
-    public ResponseEntity<ErrorResponseDto> MinioGettingDirectoryContentException(
+    public ResponseEntity<ErrorResponseDto> handleMinioGettingDirectoryContentException(
             MinioGettingDirectoryContentException ex,
             HttpServletRequest request
     ) {
@@ -245,6 +259,34 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(responseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MinioGetObjectSizeException.class)
+    public ResponseEntity<ErrorResponseDto> handleMinioGetObjectSizeException(
+            MinioGetObjectSizeException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MinioTypesNotMatchException.class)
+    public ResponseEntity<ErrorResponseDto> handleMinioTypesNotMatchException(
+            MinioTypesNotMatchException ex,
+            HttpServletRequest request
+    ) {
+        ErrorResponseDto responseDto = new ErrorResponseDto(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.BAD_REQUEST);
     }
 
 //    @ExceptionHandler(Exception.class)

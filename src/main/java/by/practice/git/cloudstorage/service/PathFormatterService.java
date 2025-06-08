@@ -6,4 +6,5 @@ public interface PathFormatterService {
     String formatDirectoryNameForResponse(String fullPath);
     String formatFilenameForResponse(String fullPath);
     String extractParentPath(String fullPath);
+    String extractResourceName(String fullPath);
 }
