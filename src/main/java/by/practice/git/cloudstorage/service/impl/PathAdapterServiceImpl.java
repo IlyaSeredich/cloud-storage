@@ -68,6 +68,15 @@ public class PathAdapterServiceImpl implements PathBuilderService, PathFormatter
         return fullPath.substring(penultimateSlashIndex +1);
     }
 
+    @Override
+    public String formatFullPathForResponse(String fullPath) {
+        int firstIndex = getFirstSlashIndex(fullPath);
+        return fullPath.substring(firstIndex + 1);
+    }
+
+    private int getFirstSlashIndex(String fullPath) {
+        return fullPath.indexOf("/");
+    }
     private int getPenultimateSlashIndex(String fullPath) {
         return fullPath.lastIndexOf("/", fullPath.length() - 2);
     }

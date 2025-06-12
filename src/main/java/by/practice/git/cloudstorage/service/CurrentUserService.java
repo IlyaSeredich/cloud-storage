@@ -4,6 +4,6 @@ import by.practice.git.cloudstorage.dto.UserResponseDto;
 import org.springframework.security.core.userdetails.User;
 
 public interface CurrentUserService {
-    UserResponseDto getCurrentUserInfo(User user);
+    UserResponseDto getCurrentUserDetails(User user);
     Long getCurrentUserId(User user);
 }

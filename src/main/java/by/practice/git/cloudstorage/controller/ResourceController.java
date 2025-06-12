@@ -1,24 +1,26 @@
 package by.practice.git.cloudstorage.controller;
 
-import by.practice.git.cloudstorage.dto.*;
-import by.practice.git.cloudstorage.dto.DirectoryResponseDto;
 import by.practice.git.cloudstorage.dto.BaseResourceResponseDto;
+import by.practice.git.cloudstorage.dto.FileResponseDto;
+import by.practice.git.cloudstorage.dto.FileUploadDto;
+import by.practice.git.cloudstorage.dto.StreamResourceDto;
 import by.practice.git.cloudstorage.service.ResourceService;
 import by.practice.git.cloudstorage.validation.ValidPath;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/resource")
 @Validated
 public class ResourceController {
     private final ResourceService resourceService;
@@ -27,12 +29,11 @@ public class ResourceController {
         this.resourceService = resourceService;
     }
 
-    @PostMapping("/resource")
+    @PostMapping
     public ResponseEntity<List<FileResponseDto>> upload(
             @RequestParam
-            @Size(max = 255, message = "Max path params size = 255")
-            @NotBlank(message = "Param path should not be empty")
-            @ValidPath(message = "Incorrect characters in path: <>,:,\",|,?,*,..")
+            @NotBlank(message = "Param \"path\" should not be empty")
+            @ValidPath(message = "Incorrect character in path: \\")
             String path,
             @ModelAttribute
             FileUploadDto fileUploadDto,
@@ -43,39 +44,9 @@ public class ResourceController {
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
-    @PostMapping("/directory")
-    public ResponseEntity<BaseResourceResponseDto> createDirectory(
-            @RequestParam
-            @Size(max = 255, message = "Max path params size = 255")
-            @NotBlank(message = "Param path should not be empty")
-            @ValidPath(message = "Incorrect characters in path: <>,:,\",|,?,*, ,..")
-            String path,
-            @AuthenticationPrincipal
-            User user
-    ) {
-        BaseResourceResponseDto createDirectoryResponseDto = resourceService.createEmptyDirectory(path, user);
-        return new ResponseEntity<>(createDirectoryResponseDto, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/directory")
-    public ResponseEntity<List<BaseResourceResponseDto>> getDirectoryContent(
-            @RequestParam
-            @Size(max = 255, message = "Max path params size = 255")
-            @NotBlank(message = "Param path should not be empty")
-            @ValidPath(message = "Incorrect characters in path")
-            String path,
-            @AuthenticationPrincipal
-            User user
-    ) {
-        List<BaseResourceResponseDto> createDirectoryResponseDto = resourceService.getDirectoryContent(path, user);
-        return new ResponseEntity<>(createDirectoryResponseDto, HttpStatus.OK);
-    }
-
-    //TODO fix slash at the end of the path
-
-    @GetMapping("/resource/search")
-    public ResponseEntity<List<BaseResourceResponseDto>> searchResources(
-            @NotBlank(message = "Param query should not be empty")
+    @GetMapping("/search")
+    public ResponseEntity<List<BaseResourceResponseDto>> search(
+            @NotBlank(message = "Param \"query\" should not be empty")
             @RequestParam String query,
             @AuthenticationPrincipal User user
     ) {
@@ -83,12 +54,14 @@ public class ResourceController {
         return new ResponseEntity<>(searchedContent, HttpStatus.OK);
     }
 
-    @GetMapping("/resource/move")
-    public ResponseEntity<BaseResourceResponseDto> moveResource(
+    @GetMapping("/move")
+    public ResponseEntity<BaseResourceResponseDto> move(
             @NotBlank(message = "Param \"from\" should not be empty")
+            @ValidPath(message = "Incorrect character in path: \\")
             @RequestParam
             String from,
             @NotBlank(message = "Param \"to\" should not be empty")
+            @ValidPath(message = "Incorrect character in path: \\")
             @RequestParam
             String to,
             @AuthenticationPrincipal
@@ -98,5 +71,45 @@ public class ResourceController {
         return new ResponseEntity<>(baseResourceResponseDto, HttpStatus.OK);
     }
 
+    @GetMapping("/download")
+    public ResponseEntity<StreamingResponseBody> download(
+            @NotBlank(message = "Param \"path\" should not be empty")
+            @ValidPath(message = "Incorrect character in path: \\")
+            @RequestParam
+            String path,
+            @AuthenticationPrincipal
+            User user
+    ) {
+        StreamResourceDto streamResourceDto = resourceService.downloadResource(path, user);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + streamResourceDto.getFilename() + "\"")
+                .body(streamResourceDto.getBody());
+    }
 
+    @DeleteMapping
+    public ResponseEntity<Void> delete(
+            @RequestParam
+            @NotBlank(message = "Param \"path\" should not be empty")
+            @ValidPath(message = "Incorrect character in path: \\")
+            String path,
+            @AuthenticationPrincipal
+            User user
+    ) {
+        resourceService.deleteResource(path, user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<BaseResourceResponseDto> get(
+            @RequestParam
+            @NotBlank(message = "Param \"path\" should not be empty")
+            @ValidPath(message = "Incorrect character in path: \\")
+            String path,
+            @AuthenticationPrincipal
+            User user
+    ) {
+        BaseResourceResponseDto baseResourceResponseDto = resourceService.getResourceInfo(path, user);
+        return new ResponseEntity<>(baseResourceResponseDto, HttpStatus.OK);
+    }
 }

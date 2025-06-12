@@ -19,7 +19,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     @Override
-    public UserResponseDto getCurrentUserInfo(org.springframework.security.core.userdetails.User user) {
+    public UserResponseDto getCurrentUserDetails(org.springframework.security.core.userdetails.User user) {
         String username = user.getUsername();
         return userMapper.toDto(username);
     }
