@@ -42,6 +42,17 @@ services:
     volumes:
       - minio_data:/minio
 
+  redis:
+    image: redis:alpine
+    container_name: redis
+    networks:
+      - app-network
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
 
 networks:
   app-network:
@@ -52,3 +63,4 @@ volumes:
   postgres_data:
   postgres_data_test:
   minio_data:
+  redis_data:

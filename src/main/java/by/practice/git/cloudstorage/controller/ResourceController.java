@@ -83,8 +83,8 @@ public class ResourceController {
         StreamResourceDto streamResourceDto = resourceService.downloadResource(path, user);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + streamResourceDto.getFilename() + "\"")
-                .body(streamResourceDto.getBody());
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + streamResourceDto.filename() + "\"")
+                .body(streamResourceDto.body());
     }
 
     @DeleteMapping
