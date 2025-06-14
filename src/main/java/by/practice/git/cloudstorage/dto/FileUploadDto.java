@@ -1,6 +1,7 @@
 package by.practice.git.cloudstorage.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 
 public class FileUploadDto {
 
-    @NotBlank(message = "Uploading resource should not be empty")
+    @NotEmpty(message = "Uploading resource should not be empty")
     private List<MultipartFile> multipartFile;
 
     public FileUploadDto(List<MultipartFile> multipartFile) {
