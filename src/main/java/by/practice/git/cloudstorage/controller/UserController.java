@@ -1,18 +1,39 @@
 package by.practice.git.cloudstorage.controller;
 
+import by.practice.git.cloudstorage.dto.ErrorResponseDto;
 import by.practice.git.cloudstorage.dto.UserAuthDto;
 import by.practice.git.cloudstorage.dto.UserCreateDto;
 import by.practice.git.cloudstorage.dto.UserResponseDto;
 import by.practice.git.cloudstorage.service.UserAccountService;
 import by.practice.git.cloudstorage.service.CurrentUserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
+@ApiResponses(
+        @ApiResponse(
+                responseCode = "500",
+                description = "Unknown error",
+                content = @Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = @Schema(implementation = ErrorResponseDto.class)
+                )
+        )
+)
+@Tag(name = "User API", description = "Endpoints for managing authentication and user data")
 @RestController
 @RequestMapping("/api")
 public class UserController {
@@ -24,6 +45,54 @@ public class UserController {
         this.userAccountService = userAccountService;
     }
 
+    @Operation(
+            summary = "Register new user",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Data for new user registration",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserCreateDto.class),
+                            examples = @ExampleObject(
+                                    name = "Example data for registration",
+                                    value = """
+                                            {
+                                                "username":"testUser",
+                                                "password":"testPassword",
+                                                "email":"test-email@gmail.com"
+                                            }
+                                            """
+
+                            )
+                    )
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "201",
+                            description = "User successfully registered",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = UserResponseDto.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid request data",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ErrorResponseDto.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "Username already taken",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ErrorResponseDto.class)
+                            )
+                    )
+            }
+    )
     @PostMapping("/auth/sign-up")
     public ResponseEntity<UserResponseDto> register(@Valid @RequestBody UserCreateDto userCreateDto,
                                                     HttpServletRequest request) {
@@ -31,6 +100,53 @@ public class UserController {
         return new ResponseEntity<>(userResponseDto, HttpStatus.CREATED);
     }
 
+    @Operation(
+            summary = "Authorize user",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Data for user authorization",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserAuthDto.class),
+                            examples = @ExampleObject(
+                                    name = "Example data for authorization",
+                                    value = """
+                                            {
+                                                "username":"testUser",
+                                                "password":"testPassword"
+                                            }
+                                            """
+
+                            )
+                    )
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "User successfully authorized",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = UserResponseDto.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid request data",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ErrorResponseDto.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Wrong username or password",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ErrorResponseDto.class)
+                            )
+                    )
+            }
+    )
     @PostMapping("/auth/sign-in")
     public ResponseEntity<UserResponseDto> authorize(
             @Valid @RequestBody UserAuthDto userAuthDto,
@@ -39,6 +155,30 @@ public class UserController {
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "Get current user details",
+            description = "Current authenticated user's details successfully retrieved",
+            security = @SecurityRequirement(name = "cookieAuth"),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Users details successfully received",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = UserResponseDto.class)
+                            )
+
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized user",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ErrorResponseDto.class)
+                            )
+                    )
+            }
+    )
     @GetMapping("/user/me")
     public ResponseEntity<UserResponseDto> me(@AuthenticationPrincipal User user) {
         UserResponseDto userResponseDto = currentUserService.getCurrentUserDetails(user);

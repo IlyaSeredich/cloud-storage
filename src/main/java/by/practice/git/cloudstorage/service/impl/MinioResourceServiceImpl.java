@@ -256,12 +256,12 @@ public class MinioResourceServiceImpl implements ResourceService {
         for (MultipartFile multipartFile : multipartFileList) {
             String filename = multipartFile.getOriginalFilename();
             validateFilename(filename);
+            String fullFilePath = getFullFilePath(fullParentPath, filename);
+            validateFileNotExists(fullFilePath);
 
             if (filename.contains("/")) {
                 createDirectoriesFromFilename(fullParentPath, filename);
             }
-            String fullFilePath = getFullFilePath(fullParentPath, filename);
-            validateFileNotExists(fullFilePath);
             putFileInMinio(fullFilePath, multipartFile);
             fileResponseDtoList.add(
                     getFileResponseDto(fullFilePath, multipartFile.getSize())

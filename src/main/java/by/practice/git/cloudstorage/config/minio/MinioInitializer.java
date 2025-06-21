@@ -1,4 +1,4 @@
-package by.practice.git.cloudstorage.config;
+package by.practice.git.cloudstorage.config.minio;
 
 import by.practice.git.cloudstorage.exception.MinioBucketInitializationException;
 import io.minio.BucketExistsArgs;

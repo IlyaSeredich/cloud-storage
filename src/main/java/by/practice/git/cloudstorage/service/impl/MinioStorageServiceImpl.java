@@ -1,6 +1,6 @@
 package by.practice.git.cloudstorage.service.impl;
 
-import by.practice.git.cloudstorage.config.MinioProperties;
+import by.practice.git.cloudstorage.config.minio.MinioProperties;
 import by.practice.git.cloudstorage.exception.*;
 import by.practice.git.cloudstorage.service.MinioStorageService;
 import io.minio.*;
@@ -149,9 +149,7 @@ public class MinioStorageServiceImpl implements MinioStorageService {
 
     private void deleteDirectory(String fullPath) {
         List<Item> contentList = getWholeDirectoryContentList(fullPath);
-        contentList.forEach(item -> {
-            removeObject(item.objectName());
-        });
+        contentList.forEach(item -> removeObject(item.objectName()));
         removeObject(fullPath);
     }
 

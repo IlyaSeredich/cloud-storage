@@ -1,5 +1,6 @@
 package by.practice.git.cloudstorage.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,6 +10,10 @@ import java.util.List;
 
 public class FileUploadDto {
 
+    @Schema(
+            description = "Uploading resource. Must be not empty",
+            requiredMode = Schema.RequiredMode.REQUIRED
+    )
     @NotEmpty(message = "Uploading resource should not be empty")
     private List<MultipartFile> multipartFile;
 

@@ -1,4 +1,4 @@
-package by.practice.git.cloudstorage.config;
+package by.practice.git.cloudstorage.config.minio;
 
 import io.minio.MinioClient;
 import org.springframework.context.annotation.Bean;
