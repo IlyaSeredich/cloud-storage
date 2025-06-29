@@ -19,14 +19,14 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @Service
-public class MinioResourceServiceImpl implements ResourceService {
+public class ResourceServiceImpl implements ResourceService {
     private final CurrentUserService currentUserService;
     private final PathBuilderService pathBuilderService;
     private final PathFormatterService pathFormatterService;
     private final MinioStorageService minioStorageService;
     private final ResourceMapper resourceMapper;
 
-    public MinioResourceServiceImpl(CurrentUserService currentUserService, PathBuilderService pathBuilderService, PathFormatterService pathFormatterService, MinioStorageService minioStorageService, ResourceMapper resourceMapper) {
+    public ResourceServiceImpl(CurrentUserService currentUserService, PathBuilderService pathBuilderService, PathFormatterService pathFormatterService, MinioStorageService minioStorageService, ResourceMapper resourceMapper) {
         this.currentUserService = currentUserService;
         this.pathBuilderService = pathBuilderService;
         this.pathFormatterService = pathFormatterService;
@@ -104,6 +104,11 @@ public class MinioResourceServiceImpl implements ResourceService {
         String fullPath = getFullResourcePath(path, user);
         validateResourceExists(fullPath);
         return createResourceResponseDto(fullPath);
+    }
+
+    @Override
+    public boolean isResourceExisting(String path) {
+        return minioStorageService.isResourceExisting(path);
     }
 
     private StreamResourceDto downloadDirectory(String fullPath) {
@@ -350,10 +355,6 @@ public class MinioResourceServiceImpl implements ResourceService {
 
     private String getParentPathForResponse(String fullPath) {
         return pathFormatterService.formatParentPathForResponse(fullPath);
-    }
-
-    private boolean isResourceExisting(String path) {
-        return minioStorageService.isResourceExisting(path);
     }
 
     private List<Item> getWholeDirectoryContentList(String fullPath) {

@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidDirectoryPath {
-    String message() default "Path should have last symbol \"/\"";
+    String message() default "Path should have last symbol '/'";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

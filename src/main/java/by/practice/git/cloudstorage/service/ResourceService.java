@@ -18,4 +18,5 @@ public interface ResourceService {
     StreamResourceDto downloadResource(String path, User user);
     void deleteResource(String path, User user);
     BaseResourceResponseDto getResourceInfo(String path, User user);
+    boolean isResourceExisting(String path);
 }

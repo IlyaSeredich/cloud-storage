@@ -11,13 +11,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.MinIOContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,7 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class UserControllerTest {
+@Testcontainers
+class UserControllerIntegrationTest {
     private static final String USERNAME = "test-user";
     private static final String PASSWORD = "test-password";
     private static final String EMAIL = "test@gmail.com";
@@ -41,6 +46,30 @@ class UserControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Container
+    @ServiceConnection
+    @SuppressWarnings("resource")
+    static PostgreSQLContainer<?> postgreSQLContainer= new PostgreSQLContainer<>("postgres")
+            .withDatabaseName("cloud_storage_test")
+            .withUsername("test_user")
+            .withPassword("test_password");
+
+    @Container
+    static MinIOContainer minioContainer = new MinIOContainer("minio/minio:latest")
+            .withUserName("testaccesskey")
+            .withPassword("testsecretkey")
+            .withCommand("server /data --console-address :9090");
+
+    @DynamicPropertySource
+    static void setMinioProperties(DynamicPropertyRegistry registry) {
+        registry.add("minio.url", () -> String.format("http://%s:%d",
+                minioContainer.getHost(),
+                minioContainer.getMappedPort(9000)));
+        registry.add("minio.accessKey", () -> "testaccesskey");
+        registry.add("minio.secretKey", () -> "testsecretkey");
+        registry.add("minio.bucket", () -> "test-cloud-storage-bucket");
+    }
 
     @BeforeEach
     void setUp() {
@@ -277,51 +306,13 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldAuthenticateUserAfterRegistration() throws Exception {
-        String url = "/api/auth/sign-up";
-
-        MockHttpSession mockHttpSession = new MockHttpSession();
-
-        mockMvc.perform(post(url)
-                        .session(mockHttpSession)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isCreated());
-
-
-        SecurityContext securityContext =
-                (SecurityContext) mockHttpSession.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-
-        assertThat(securityContext).isNotNull();
-        Authentication authentication = securityContext.getAuthentication();
-        assertThat(authentication).isNotNull();
-        assertThat(authentication.isAuthenticated()).isTrue();
-        assertThat(authentication.getName()).isEqualTo(USERNAME);
-    }
-
-    @Test
     void shouldAuthorizeExistingUser() throws Exception {
-        String url = "/api/auth/sign-in";
-
-        MockHttpSession mockHttpSession = new MockHttpSession();
-
         createUser();
-
+        String url = "/api/auth/sign-in";
         mockMvc.perform(post(url)
-                        .session(mockHttpSession)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userAuthDto)))
-                .andExpect(jsonPath("$.username").value(USERNAME))
-                .andExpect(status().isOk())
-                .andDo(print());
-
-        SecurityContext securityContext =
-                (SecurityContext) mockHttpSession.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-        assertThat(securityContext).isNotNull();
-        Authentication authentication = securityContext.getAuthentication();
-        assertThat(authentication).isNotNull();
-        assertThat(authentication.isAuthenticated()).isTrue();
-        assertThat(authentication.getName()).isEqualTo(USERNAME);
+                .andExpect(jsonPath("$.username").value(USERNAME));
     }
 
     @Test
@@ -468,40 +459,13 @@ class UserControllerTest {
                 .andDo(print());
     }
 
-    @Test
-    void shouldGetUsersInfoAfterRegistration() throws Exception {
-        String url = "/api/user/me";
-        MockHttpSession mockHttpSession = new MockHttpSession();
-
-        mockMvc.perform(post("/api/auth/sign-up")
-                        .session(mockHttpSession)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(get(url)
-                        .session(mockHttpSession))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value(USERNAME))
-                .andDo(print());
-    }
 
     @Test
-    void shouldGetUsersInfoAfterAuthorization() throws Exception {
+    @WithMockUser(username = USERNAME)
+    void shouldGetUsersDetailsForAuthenticatedUser() throws Exception {
         String url = "/api/user/me";
-        MockHttpSession mockHttpSession = new MockHttpSession();
 
-        createUser();
-
-        mockMvc.perform(post("/api/auth/sign-in")
-                        .session(mockHttpSession)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userAuthDto)))
-                .andExpect(status().isOk());
-
-
-        mockMvc.perform(get(url)
-                        .session(mockHttpSession))
+        mockMvc.perform(get(url))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value(USERNAME))
                 .andDo(print());

@@ -10,15 +10,15 @@ public class UserAuthDto {
             description = "Username of the user. Must be between 4 and 15 characters long and not blank.",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @NotBlank
-    @Size(min = 4, max = 15)
+    @NotBlank(message = "Username must not be blank")
+    @Size(min = 4, max = 15, message = "Username must be between 4 and 15 characters long")
     private String username;
     @Schema(
             description = "Password of the user. Must have at least 6 characters and be not blank.",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @NotBlank
-    @Size(min = 6)
+    @NotBlank(message = "Password must not be blank")
+    @Size(min = 6, message = "Password must have at least 6 characters")
     private String password;
 
     public UserAuthDto(String username, String password) {

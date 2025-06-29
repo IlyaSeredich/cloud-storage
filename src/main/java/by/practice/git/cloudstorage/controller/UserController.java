@@ -156,8 +156,29 @@ public class UserController {
     }
 
     @Operation(
+            summary = "User logout",
+            description = "Invalidates current session and clears cookies. Requires valid authentication.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Logout successful. Session destroyed and cookies cleared."
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized user.",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ErrorResponseDto.class)
+                            )
+                    )
+            }
+    )
+    @PostMapping("/auth/sign-out")
+    public void logout() {
+    }
+
+    @Operation(
             summary = "Get current user details",
-            description = "Current authenticated user's details successfully retrieved",
             security = @SecurityRequirement(name = "cookieAuth"),
             responses = {
                     @ApiResponse(

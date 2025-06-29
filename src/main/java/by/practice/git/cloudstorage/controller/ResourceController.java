@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
@@ -28,11 +29,30 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import java.util.List;
 
+@ApiResponses({
+        @ApiResponse(
+                responseCode = "500",
+                description = "Unknown exception",
+                content = @Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = @Schema(implementation = ErrorResponseDto.class)
+                )
+        ),
+        @ApiResponse(
+                responseCode = "401",
+                description = "Unauthorized user",
+                content = @Content(
+                        mediaType = MediaType.APPLICATION_JSON_VALUE,
+                        schema = @Schema(implementation = ErrorResponseDto.class)
+                )
+        )
+}
+)
+@Tag(name = "Resource API", description = "Endpoints for general actions with files and directories")
+@SecurityRequirement(name = "cookieAuth")
 @RestController
 @RequestMapping("/api/resource")
 @Validated
-@SecurityRequirement(name = "cookieAuth")
-@Tag(name = "Resource API", description = "Endpoints for general actions with files and directories")
 public class ResourceController {
     private final ResourceService resourceService;
 
@@ -43,6 +63,7 @@ public class ResourceController {
     @PostMapping
     @Operation(
             summary = "Upload resource",
+            description = "Uploads one or more files to the specified path on the server. Requires authentication.",
             parameters = {
                     @Parameter(
                             name = "path",
@@ -78,7 +99,7 @@ public class ResourceController {
                                                                     "path":"example-dir/file.txt",
                                                                     "name":"file.txt",
                                                                     "type":"FILE",
-                                                                    "size":"1234"
+                                                                    "size":1234
                                                                 }
                                                             ]
                                                             """
@@ -97,22 +118,6 @@ public class ResourceController {
                     @ApiResponse(
                             responseCode = "409",
                             description = "Resource already exists",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized user",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Unknown exception",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = ErrorResponseDto.class)
@@ -139,6 +144,7 @@ public class ResourceController {
     @GetMapping("/search")
     @Operation(
             summary = "Search resource",
+            description = "Searches for resources (files and directories) that match the given query string.",
             parameters = {
                     @Parameter(
                             name = "query",
@@ -166,7 +172,7 @@ public class ResourceController {
                                                                     "path":"example-dir/file.txt",
                                                                     "name":"file.txt",
                                                                     "type":"FILE",
-                                                                    "size":"1234"
+                                                                    "size":1234
                                                                 }
                                                             ]
                                                             """
@@ -194,22 +200,6 @@ public class ResourceController {
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = ErrorResponseDto.class)
                             )
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized user",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Unknown error",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
                     )
             }
     )
@@ -225,7 +215,7 @@ public class ResourceController {
     @GetMapping("/move")
     @Operation(
             summary = "Move/rename resource",
-            description = "Resources type should math. Renaming file to directory or vice versa is forbidden",
+            description = "Moves or renames a resource. Resource types must match: file can't be renamed to directory and vice versa.",
             parameters = {
                     @Parameter(
                             name = "from",
@@ -257,7 +247,7 @@ public class ResourceController {
                                                                     "path":"example-dir2/file.txt",
                                                                     "name":"file.txt",
                                                                     "type":"FILE",
-                                                                    "size":"1234"
+                                                                    "size":1234
                                                                 }
                                                             """
                                             ),
@@ -284,14 +274,6 @@ public class ResourceController {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized user",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
                             responseCode = "404",
                             description = "Resource not found",
                             content = @Content(
@@ -301,15 +283,7 @@ public class ResourceController {
                     ),
                     @ApiResponse(
                             responseCode = "409",
-                            description = "Resource with path 'to' already exists",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Unknown exception",
+                            description = "Resource with target path 'to' already exists",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = ErrorResponseDto.class)
@@ -336,6 +310,7 @@ public class ResourceController {
     @GetMapping("/download")
     @Operation(
             summary = "Download resource",
+            description = "Downloads a file from the server. Returns binary content with Content-Disposition: attachment.",
             parameters = {
                     @Parameter(
                             name = "path",
@@ -372,24 +347,8 @@ public class ResourceController {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized user",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
                             responseCode = "404",
                             description = "Resource not found",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Unknown exception",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = ErrorResponseDto.class)
@@ -415,6 +374,7 @@ public class ResourceController {
     @DeleteMapping
     @Operation(
             summary = "Delete resource",
+            description = "Deletes a resource (file or directory) by its path. If it is a directory, must end with '/'",
             parameters = {
                     @Parameter(
                             name = "path",
@@ -437,24 +397,8 @@ public class ResourceController {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized user",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
                             responseCode = "404",
                             description = "Resource not found",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Unknown exception",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = ErrorResponseDto.class)
@@ -477,6 +421,7 @@ public class ResourceController {
     @GetMapping
     @Operation(
             summary = "Get resources details",
+            description = "Returns detailed information about a resource (file or directory) by its path.",
             parameters = {
                     @Parameter(
                             name = "path",
@@ -500,7 +445,7 @@ public class ResourceController {
                                                                     "path":"example-dir2/file.txt",
                                                                     "name":"file.txt",
                                                                     "type":"FILE",
-                                                                    "size":"1234"
+                                                                    "size":1234
                                                                 }
                                                             """
                                             ),
@@ -528,24 +473,8 @@ public class ResourceController {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized user",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
                             responseCode = "404",
                             description = "Resource not found",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Unknown exception",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = ErrorResponseDto.class)
@@ -555,7 +484,7 @@ public class ResourceController {
     )
     public ResponseEntity<BaseResourceResponseDto> get(
             @RequestParam
-            @NotBlank(message = "Param \"path\" should not be empty")
+            @NotBlank(message = "Param 'path' should not be empty")
             @ValidPath(message = "Incorrect character in path: \\")
             String path,
             @AuthenticationPrincipal

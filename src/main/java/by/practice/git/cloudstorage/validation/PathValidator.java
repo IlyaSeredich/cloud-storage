@@ -9,7 +9,7 @@ public class PathValidator implements ConstraintValidator<ValidPath, String> {
     public boolean isValid(String path, ConstraintValidatorContext context) {
         if(path == null) return true;
 
-        return !path.contains("\"");
+        return !path.contains("\\");
     }
 
 }

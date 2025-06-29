@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
         name = "cookieAuth",
         type = SecuritySchemeType.APIKEY,
         in = SecuritySchemeIn.COOKIE,
-        paramName = "JSESSIONID",
+        paramName = "SESSION",
         description = "Authentication by sessions"
 )
 public class OpenApiConfig {

@@ -3,7 +3,9 @@ package by.practice.git.cloudstorage.exception.handler;
 import by.practice.git.cloudstorage.dto.ErrorResponseDto;
 import by.practice.git.cloudstorage.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +15,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -64,7 +68,10 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST,
                 request.getRequestURI()
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponseDto);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -73,12 +80,50 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
 
+        String message = ex.getConstraintViolations()
+                .stream()
+                .map(ConstraintViolation::getMessage)
+                .findFirst()
+                .orElse("Invalid request");
+
+
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                ex.getMessage(),
+                message,
                 HttpStatus.BAD_REQUEST,
                 request.getRequestURI()
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponseDto);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ErrorResponseDto> handleHandlerMethodValidationException(
+            HandlerMethodValidationException ex,
+            HttpServletRequest request
+    ) {
+        Optional<String> errorMessage = ex.getAllErrors().stream()
+                .map(error -> {
+                    if (error instanceof MessageSourceResolvable resolvable) {
+                        return Optional.ofNullable(resolvable.getDefaultMessage())
+                                .orElse("Validation failed");
+                    }
+                    return "Validation failed";
+                })
+                .findFirst();
+
+        String message = errorMessage.orElse("Validation failed");
+
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                message,
+                HttpStatus.BAD_REQUEST,
+                request.getRequestURI()
+        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponseDto);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -217,7 +262,9 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
 
-        return new ResponseEntity<>(responseDto, HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(responseDto);
     }
 
     @ExceptionHandler(MinioUploadException.class)
@@ -308,7 +355,6 @@ public class GlobalExceptionHandler {
 
 //    @ExceptionHandler(Exception.class)
 //    public ResponseEntity<ErrorResponseDto> handleException(
-//            Exception ex,
 //            HttpServletRequest request
 //    ) {
 //        ErrorResponseDto responseDto = new ErrorResponseDto(

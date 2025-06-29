@@ -7,14 +7,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-
+@Schema(description = "DTO for uploading resources")
 public class FileUploadDto {
 
     @Schema(
             description = "Uploading resource. Must be not empty",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
-    @NotEmpty(message = "Uploading resource should not be empty")
+    @NotEmpty(message = "Uploading resource must not be empty")
     private List<MultipartFile> multipartFile;
 
     public FileUploadDto(List<MultipartFile> multipartFile) {

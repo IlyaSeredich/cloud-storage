@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
@@ -25,10 +26,30 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@ApiResponses(
+        {
+                @ApiResponse(
+                        responseCode = "500",
+                        description = "Unknown exception",
+                        content = @Content(
+                                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                schema = @Schema(implementation = ErrorResponseDto.class)
+                        )
+                ),
+                @ApiResponse(
+                        responseCode = "401",
+                        description = "Unauthorized user",
+                        content = @Content(
+                                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                schema = @Schema(implementation = ErrorResponseDto.class)
+                        )
+                )
+        }
+)
+@Tag(name = "Directory API", description = "Endpoints for actions only with directories")
+@SecurityRequirement(name = "cookieAuth")
 @RestController
 @RequestMapping("/api/directory")
-@SecurityRequirement(name = "cookieAuth")
-@Tag(name = "Directory API", description = "Endpoints for actions only with directories")
 public class DirectoryController {
     private final ResourceService resourceService;
 
@@ -39,6 +60,7 @@ public class DirectoryController {
     @PostMapping
     @Operation(
             summary = "Create new directory",
+            description = "Creates a new directory at the specified path. The path must end with '/'",
             parameters = {
                     @Parameter(
                             name = "path",
@@ -79,24 +101,8 @@ public class DirectoryController {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized user",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
                             responseCode = "404",
                             description = "Parent path not found",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Unknown exception",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = ErrorResponseDto.class)
@@ -120,6 +126,7 @@ public class DirectoryController {
     @GetMapping
     @Operation(
             summary = "Get directory content",
+            description = "Returns the list of resources contained in the specified directory.",
             parameters = {
                     @Parameter(
                             name = "path",
@@ -144,7 +151,7 @@ public class DirectoryController {
                                                                         "path":"example-dir2/file.txt",
                                                                         "name":"file.txt",
                                                                         "type":"FILE",
-                                                                        "size":"1234"
+                                                                        "size":1234
                                                                     }
                                                                 ]
                                                             """
@@ -175,24 +182,8 @@ public class DirectoryController {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized user",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
                             responseCode = "404",
                             description = "Directory not found",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Unknown exception",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = ErrorResponseDto.class)
