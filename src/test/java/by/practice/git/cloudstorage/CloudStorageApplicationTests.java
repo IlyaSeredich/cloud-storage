@@ -2,9 +2,11 @@ package by.practice.git.cloudstorage;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest
-class CloudStorageApplicationTests {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+class CloudStorageApplicationTests extends BaseIntegrationTest {
 
     @Test
     void contextLoads() {

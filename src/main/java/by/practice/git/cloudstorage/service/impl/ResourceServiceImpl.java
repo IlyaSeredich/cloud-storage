@@ -44,7 +44,7 @@ public class ResourceServiceImpl implements ResourceService {
     public DirectoryResponseDto createEmptyDirectory(String directoryPathFromRequest, User user) {
         String fullPath = getFullResourcePath(directoryPathFromRequest, user);
         validateCreatingDirectoryConditions(fullPath);
-        putEmptyDirectoryInMinio(fullPath);
+        putEmptyDirectory(fullPath);
         return getDirectoryResponseDto(fullPath);
     }
 
@@ -60,7 +60,7 @@ public class ResourceServiceImpl implements ResourceService {
     public List<BaseResourceResponseDto> getDirectoryContent(String directoryPathFromRequest, User user) {
         String fullPath = getFullResourcePath(directoryPathFromRequest, user);
         validateResourceExists(fullPath);
-        List<Item> minioDirectoryContentList = getMinioDirectoryContentList(fullPath);
+        List<Item> minioDirectoryContentList = getDirectoryContentList(fullPath);
         return createResourceResponseDtoList(minioDirectoryContentList);
     }
 
@@ -125,7 +125,7 @@ public class ResourceServiceImpl implements ResourceService {
 
     private StreamingResponseBody getFileStreamingResponseBody(String fullPath) {
         return outputStream -> {
-            try (InputStream inputStream = downloadMinioResource(fullPath)) {
+            try (InputStream inputStream = downloadResourceFromStorage(fullPath)) {
                 StreamUtils.copy(inputStream, outputStream);
             }
         };
@@ -143,7 +143,7 @@ public class ResourceServiceImpl implements ResourceService {
         try (ZipOutputStream zip = new ZipOutputStream(output)) {
             for (Item item : wholeContentList) {
                 String objectName = item.objectName();
-                try (InputStream input = downloadMinioResource(objectName)) {
+                try (InputStream input = downloadResourceFromStorage(objectName)) {
                     zip.putNextEntry(new ZipEntry(objectName.substring(fullParentPath.length())));
                     StreamUtils.copy(input, zip);
                     zip.closeEntry();
@@ -216,7 +216,7 @@ public class ResourceServiceImpl implements ResourceService {
         minioStorageService.putRootDirectory(rootDirName);
     }
 
-    private List<Item> getMinioDirectoryContentList(String fullPath) {
+    private List<Item> getDirectoryContentList(String fullPath) {
         return minioStorageService.getDirectoryObjectsList(fullPath);
     }
 
@@ -237,7 +237,7 @@ public class ResourceServiceImpl implements ResourceService {
         }
     }
 
-    private void putEmptyDirectoryInMinio(String fullPath) {
+    private void putEmptyDirectory(String fullPath) {
         minioStorageService.putEmptyDirectory(fullPath);
     }
 
@@ -267,7 +267,7 @@ public class ResourceServiceImpl implements ResourceService {
             if (filename.contains("/")) {
                 createDirectoriesFromFilename(fullParentPath, filename);
             }
-            putFileInMinio(fullFilePath, multipartFile);
+            putFile(fullFilePath, multipartFile);
             fileResponseDtoList.add(
                     getFileResponseDto(fullFilePath, multipartFile.getSize())
             );
@@ -307,7 +307,7 @@ public class ResourceServiceImpl implements ResourceService {
         StringBuilder directoryPath = new StringBuilder(fullParentPath);
         for(int i = 0; i < split.length - 1; i++) {
             directoryPath.append(split[i]).append("/");
-            putEmptyDirectoryInMinio(directoryPath.toString());
+            putEmptyDirectory(directoryPath.toString());
         }
     }
 
@@ -327,7 +327,7 @@ public class ResourceServiceImpl implements ResourceService {
         }
     }
 
-    private void putFileInMinio(String fullFilePath, MultipartFile multipartFile) {
+    private void putFile(String fullFilePath, MultipartFile multipartFile) {
         minioStorageService.putFile(fullFilePath, multipartFile);
     }
 
@@ -361,7 +361,7 @@ public class ResourceServiceImpl implements ResourceService {
         return minioStorageService.getWholeDirectoryContentList(fullPath);
     }
 
-    private InputStream downloadMinioResource(String fullPath) {
+    private InputStream downloadResourceFromStorage(String fullPath) {
         return minioStorageService.downloadResource(fullPath);
     }
 }

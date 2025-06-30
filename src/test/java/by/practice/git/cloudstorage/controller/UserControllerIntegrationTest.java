@@ -1,5 +1,6 @@
 package by.practice.git.cloudstorage.controller;
 
+import by.practice.git.cloudstorage.BaseIntegrationTest;
 import by.practice.git.cloudstorage.dto.UserAuthDto;
 import by.practice.git.cloudstorage.dto.UserCreateDto;
 import by.practice.git.cloudstorage.exception.EmailAlreadyExistException;
@@ -32,9 +33,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
-@Testcontainers
-class UserControllerIntegrationTest {
+//@Transactional
+//@Testcontainers
+class UserControllerIntegrationTest extends BaseIntegrationTest {
     private static final String USERNAME = "test-user";
     private static final String PASSWORD = "test-password";
     private static final String EMAIL = "test@gmail.com";
@@ -47,29 +48,29 @@ class UserControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Container
-    @ServiceConnection
-    @SuppressWarnings("resource")
-    static PostgreSQLContainer<?> postgreSQLContainer= new PostgreSQLContainer<>("postgres")
-            .withDatabaseName("cloud_storage_test")
-            .withUsername("test_user")
-            .withPassword("test_password");
-
-    @Container
-    static MinIOContainer minioContainer = new MinIOContainer("minio/minio:latest")
-            .withUserName("testaccesskey")
-            .withPassword("testsecretkey")
-            .withCommand("server /data --console-address :9090");
-
-    @DynamicPropertySource
-    static void setMinioProperties(DynamicPropertyRegistry registry) {
-        registry.add("minio.url", () -> String.format("http://%s:%d",
-                minioContainer.getHost(),
-                minioContainer.getMappedPort(9000)));
-        registry.add("minio.accessKey", () -> "testaccesskey");
-        registry.add("minio.secretKey", () -> "testsecretkey");
-        registry.add("minio.bucket", () -> "test-cloud-storage-bucket");
-    }
+//    @Container
+//    @ServiceConnection
+//    @SuppressWarnings("resource")
+//    static PostgreSQLContainer<?> postgreSQLContainer= new PostgreSQLContainer<>("postgres")
+//            .withDatabaseName("cloud_storage_test")
+//            .withUsername("test_user")
+//            .withPassword("test_password");
+//
+//    @Container
+//    static MinIOContainer minioContainer = new MinIOContainer("minio/minio:latest")
+//            .withUserName("testaccesskey")
+//            .withPassword("testsecretkey")
+//            .withCommand("server /data --console-address :9090");
+//
+//    @DynamicPropertySource
+//    static void setMinioProperties(DynamicPropertyRegistry registry) {
+//        registry.add("minio.url", () -> String.format("http://%s:%d",
+//                minioContainer.getHost(),
+//                minioContainer.getMappedPort(9000)));
+//        registry.add("minio.accessKey", () -> "testaccesskey");
+//        registry.add("minio.secretKey", () -> "testsecretkey");
+//        registry.add("minio.bucket", () -> "test-cloud-storage-bucket");
+//    }
 
     @BeforeEach
     void setUp() {
