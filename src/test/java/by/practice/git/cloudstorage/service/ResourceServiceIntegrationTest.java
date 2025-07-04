@@ -1,35 +1,25 @@
 package by.practice.git.cloudstorage.service;
 
 import by.practice.git.cloudstorage.BaseIntegrationTest;
-import by.practice.git.cloudstorage.config.TestContainersConfig;
 import by.practice.git.cloudstorage.dto.BaseResourceResponseDto;
 import by.practice.git.cloudstorage.dto.FileUploadDto;
 import by.practice.git.cloudstorage.dto.StreamResourceDto;
 import by.practice.git.cloudstorage.dto.UserCreateDto;
 import by.practice.git.cloudstorage.dto.enums.ResourceType;
 import by.practice.git.cloudstorage.exception.MinioResourceNotExistsException;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MinIOContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,8 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-//@Testcontainers
-//@Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class ResourceServiceIntegrationTest extends BaseIntegrationTest {
     private static final String DIRECTORY_PATH = "test-dir/";
 
@@ -65,30 +54,6 @@ public class ResourceServiceIntegrationTest extends BaseIntegrationTest {
         user = createUserDetails();
     }
 
-//    @Container
-//    @ServiceConnection
-//    @SuppressWarnings("resource")
-//    static PostgreSQLContainer<?> postgreSQLContainer= new PostgreSQLContainer<>("postgres")
-//                .withDatabaseName("cloud_storage_test")
-//                .withUsername("test_user")
-//                .withPassword("test_password");
-//
-//    @Container
-//    static MinIOContainer minioContainer = new MinIOContainer("minio/minio:latest")
-//            .withUserName("testaccesskey")
-//            .withPassword("testsecretkey")
-//            .withCommand("server /data --console-address :9090");
-//
-//    @DynamicPropertySource
-//    static void setMinioProperties(DynamicPropertyRegistry registry) {
-//        registry.add("minio.url", () -> String.format("http://%s:%d",
-//                minioContainer.getHost(),
-//                minioContainer.getMappedPort(9000)));
-//        registry.add("minio.accessKey", () -> "testaccesskey");
-//        registry.add("minio.secretKey", () -> "testsecretkey");
-//        registry.add("minio.bucket", () -> "test-cloud-storage-bucket");
-//    }
-
     @Test
     void shouldCreateEmptyDirectory() {
         resourceService.createEmptyDirectory(DIRECTORY_PATH, user);
@@ -112,7 +77,7 @@ public class ResourceServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void shouldUploadFile() {
-        String content = "Test";
+        String content = "Test file";
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "file.txt",
@@ -126,6 +91,24 @@ public class ResourceServiceIntegrationTest extends BaseIntegrationTest {
         String fullPath = getFullPath(DIRECTORY_PATH + file.getOriginalFilename());
         boolean resourceExisting = resourceService.isResourceExisting(fullPath);
         assertThat(resourceExisting).isTrue();
+    }
+
+    @Test
+    void shouldUploadFileWithDirectoryInName() {
+        String content = "Test file with directory";
+        MockMultipartFile file = new MockMultipartFile(
+                "files",
+                "dir1/dir2/file.txt",
+                "text/plain",
+                content.getBytes()
+        );
+
+        FileUploadDto fileUploadDto = new FileUploadDto(List.of(file));
+        resourceService.createEmptyDirectory(DIRECTORY_PATH, user);
+        resourceService.uploadFiles(DIRECTORY_PATH, fileUploadDto, user);
+        String fullPath = getFullPath(DIRECTORY_PATH + file.getOriginalFilename());
+        boolean exists = resourceService.isResourceExisting(fullPath);
+        assertThat(exists).isTrue();
     }
 
     @Test

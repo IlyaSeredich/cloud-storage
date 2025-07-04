@@ -17,13 +17,13 @@ public abstract class BaseIntegrationTest {
     @Container
     @ServiceConnection
     @SuppressWarnings("resource")
-    private static PostgreSQLContainer<?> postgreSQLContainer= new PostgreSQLContainer<>("postgres")
+    private static final PostgreSQLContainer<?> postgreSQLContainer= new PostgreSQLContainer<>("postgres")
             .withDatabaseName("cloud_storage_test")
             .withUsername("test_user")
             .withPassword("test_password");
 
     @Container
-    private static MinIOContainer minioContainer = new MinIOContainer("minio/minio:latest")
+    private static final MinIOContainer minioContainer = new MinIOContainer("minio/minio:latest")
             .withUserName("testaccesskey")
             .withPassword("testsecretkey")
             .withCommand("server /data --console-address :9090");

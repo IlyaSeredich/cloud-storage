@@ -6,25 +6,17 @@ import by.practice.git.cloudstorage.dto.UserCreateDto;
 import by.practice.git.cloudstorage.exception.EmailAlreadyExistException;
 import by.practice.git.cloudstorage.exception.UserAlreadyExistException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.MinIOContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -33,8 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-//@Transactional
-//@Testcontainers
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class UserControllerIntegrationTest extends BaseIntegrationTest {
     private static final String USERNAME = "test-user";
     private static final String PASSWORD = "test-password";
@@ -47,30 +38,6 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-//    @Container
-//    @ServiceConnection
-//    @SuppressWarnings("resource")
-//    static PostgreSQLContainer<?> postgreSQLContainer= new PostgreSQLContainer<>("postgres")
-//            .withDatabaseName("cloud_storage_test")
-//            .withUsername("test_user")
-//            .withPassword("test_password");
-//
-//    @Container
-//    static MinIOContainer minioContainer = new MinIOContainer("minio/minio:latest")
-//            .withUserName("testaccesskey")
-//            .withPassword("testsecretkey")
-//            .withCommand("server /data --console-address :9090");
-//
-//    @DynamicPropertySource
-//    static void setMinioProperties(DynamicPropertyRegistry registry) {
-//        registry.add("minio.url", () -> String.format("http://%s:%d",
-//                minioContainer.getHost(),
-//                minioContainer.getMappedPort(9000)));
-//        registry.add("minio.accessKey", () -> "testaccesskey");
-//        registry.add("minio.secretKey", () -> "testsecretkey");
-//        registry.add("minio.bucket", () -> "test-cloud-storage-bucket");
-//    }
 
     @BeforeEach
     void setUp() {

@@ -6,7 +6,7 @@ services:
       - app-network
     restart: always
     environment:
-      POSTGRES_DB: 'cloud_storage'
+      POSTGRES_DB: '${DB_DATABASE}'
       POSTGRES_USER: '${DB_USER}'
       POSTGRES_PASSWORD: '${DB_PASSWORD}'
     ports:

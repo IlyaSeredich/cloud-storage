@@ -56,8 +56,6 @@ public class MinioStorageServiceImpl implements MinioStorageService {
         }
     }
 
-
-    //TODO to improve method for big files
     @Override
     public void putFile(String fullFilePath, MultipartFile multipartFile) {
         try (InputStream inputStream = multipartFile.getInputStream()) {
