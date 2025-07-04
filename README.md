@@ -36,7 +36,7 @@
 
 ```
 src/
-├── main/java/by/practice/git/cloudstorage/
+├── main/java/com/cloud/cloudstorage/
 │   ├── config/          # Конфигурации (Security, MinIO, Redis)
 │   ├── controller/      # REST контролеры
 │   ├── dto/            # Data Transfer Objects
@@ -90,14 +90,14 @@ mvn spring-boot:run
 3. Настройте Redis (опционально)
 4. Создайте `.env` файл с настройками:
 ```env
-DB_URL=jdbc:postgresql://localhost:5432/cloud_storage
-DB_USERNAME=your_username
+HOST=your_host
+DB_DATABASE=your_db_name
+DB_USER=your_username
 DB_PASSWORD=your_password
-MINIO_URL=http://localhost:9000
+MINIO_BUCKET=your_bucket_name
 MINIO_ACCESS_KEY=your_access_key
 MINIO_SECRET_KEY=your_secret_key
 MINIO_BUCKET=cloud-storage-bucket
-REDIS_URL=redis://localhost:6379
 ```
 
 ## 📚 API Документация
@@ -110,16 +110,19 @@ http://localhost:8080/swagger-ui.html
 #### Аутентификация
 - `POST /api/auth/sign-up` - Регистрация пользователя
 - `POST /api/auth/sign-in` - Авторизация
+- `POST /api/auth/sign-out` -Логаут
 - `GET /api/user/me` - Информация о текущем пользователе
 
 #### Управление ресурсами
-- `GET /api/resources` - Список файлов в директории
-- `POST /api/resources/directory` - Создание папки
-- `POST /api/resources/upload` - Загрузка файлов
-- `GET /api/resources/download` - Скачивание файла
-- `PUT /api/resources/move` - Перемещение/переименование
-- `DELETE /api/resources` - Удаление файла/папки
-- `GET /api/resources/search` - Поиск файлов
+- `GET /api/resource` - Получение деталей ресурса
+- `POST /api/resource/directory` - Создание папки
+- `POST /api/resource` - Загрузка файлов
+- `GET /api/resource/download` - Скачивание файла/папки
+- `GET /api/resource/move` - Перемещение/переименование
+- `DELETE /api/resource` - Удаление файла/папки
+- `GET /api/resource/search` - Поиск файлов
+- `POST /api/directory` - Создание новой папки
+- `GET /api/directory` - Получение содержимого папки
 
 ## 🧪 Тестирование
 
@@ -137,7 +140,7 @@ mvn test
 
 ### Структура тестов
 ```
-src/test/java/by/practice/git/cloudstorage/
+src/test/java/com/cloud/cloudstorage/
 ├── BaseIntegrationTest.java           # Родительский класс с настройкой контейнеров
 ├── CloudStorageApplicationTests.java  # Тест загрузки контекста
 ├── controller/                        # Тесты контролеров
