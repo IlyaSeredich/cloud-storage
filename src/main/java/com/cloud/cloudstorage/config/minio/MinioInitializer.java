@@ -5,7 +5,6 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import jakarta.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component

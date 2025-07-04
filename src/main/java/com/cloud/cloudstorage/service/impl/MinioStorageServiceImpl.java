@@ -5,7 +5,6 @@ import com.cloud.cloudstorage.exception.*;
 import com.cloud.cloudstorage.service.MinioStorageService;
 import io.minio.*;
 import io.minio.messages.Item;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
