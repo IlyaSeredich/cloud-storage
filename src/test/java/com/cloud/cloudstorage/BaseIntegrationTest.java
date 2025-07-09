@@ -23,7 +23,7 @@ public abstract class BaseIntegrationTest {
             .withPassword("test_password");
 
     @Container
-    private static final MinIOContainer minioContainer = new MinIOContainer("minio/minio:latest")
+    private static final MinIOContainer minioContainer = new MinIOContainer("minio/minio")
             .withUserName("testaccesskey")
             .withPassword("testsecretkey")
             .withCommand("server /data --console-address :9090");
